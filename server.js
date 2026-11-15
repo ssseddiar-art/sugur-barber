@@ -100,7 +100,10 @@ app.get('/api/admin/reviews',auth,(q,r)=>r.json([...D.reviews].sort((a,b)=>b.at-
 app.post('/api/admin/review',auth,(q,r)=>{const{id,approved}=q.body||{},v=D.reviews.find(x=>x.id===id);if(!v||typeof approved!=='boolean')return r.sendStatus(404);v.approved=approved;save();r.json({})});
 app.delete('/api/admin/review/:id',auth,(q,r)=>{const i=D.reviews.findIndex(x=>x.id===q.params.id);if(i<0)return r.sendStatus(404);D.reviews.splice(i,1);save();r.json({ok:true})});
 app.get('/admin',(q,r)=>r.sendFile(path.join(__dirname,'public/admin.html')));
+/* ГЛАВНАЯ: если в public нет index.html, отдаём sugur_red.html */
+app.get('/',(q,r)=>{const p=path.join(__dirname,'public/index.html'),s=path.join(__dirname,'public/sugur_red.html');r.sendFile(fs.existsSync(p)?p:s)});
 app.use(express.static(path.join(__dirname,'public'),{setHeaders:(res,f)=>{ /* картинки и музыка кэшируются на неделю (быстрее на телефоне), html/js/css — всегда свежие */
  res.setHeader('Cache-Control',/\.(jpe?g|png|mp3|webp|svg)$/i.test(f)?'public, max-age=604800':'no-cache')}}));
 if(!process.env.ADMIN_PASSWORD)console.warn('⚠ ADMIN_PASSWORD не задан: используется пароль по умолчанию. Задайте свой пароль в переменных окружения хостинга!');
 app.listen(PORT,()=>console.log('http://localhost:'+PORT));
+
